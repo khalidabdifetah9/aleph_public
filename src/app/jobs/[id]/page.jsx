@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
@@ -32,21 +31,20 @@ import {
   Wallet,
 } from "lucide-react";
 
-export default async function JobDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function JobDetailPage({ params }) {
   const { id } = await params;
 
-  const reqHeaders = await headers();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`, {
-    headers: reqHeaders,
-    cache: "no-store",
-  });
+  // Mock user data - replace with your actual user fetching logic
+  const user = {
+    id: "user_123",
+    name: "John Doe",
+    email: "john@example.com",
+    role: "CLIENT", // or "DESIGNER"
+    verificationStatus: "APPROVED",
+  };
 
-  const session = res.ok ? await res.json() : null;
-  const user = session?.user;
+  // If you want to keep session checking without auth, use this:
+  // const user = await getUserFromSession(); // Your custom function
 
   if (!user) {
     redirect(`/login?next=${encodeURIComponent(`/jobs/${id}`)}`);
@@ -361,6 +359,6 @@ export default async function JobDetailPage({
   );
 }
 
-function ensureHttp(url: string) {
+function ensureHttp(url) {
   return url.startsWith("http") ? url : `https://${url}`;
 }
