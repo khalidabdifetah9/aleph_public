@@ -1,4 +1,4 @@
-export { DashboardPage } from "./DashboardPage";
+export { default as DashboardPage } from "./DashboardPage";
 export { ClientDashboard } from "./ClientDashboard";
 export { DesignerDashboard } from "./DesignerDashboard";
 export { StatCard } from "./StatCard";
