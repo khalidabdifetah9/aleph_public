@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/components/admin/graph.jsx", "src/components/admin/AdminPage.jsx", "src/components/admin/AdminTabs.jsx", "src/components/admin/JobList.jsx", "src/components/admin/LiveJobsList.jsx", "src/components/admin/PaymentList.jsx", "src/components/admin/UserList.jsx", "src/components/dashboard/ClientDashboard.jsx", "src/app/admin/page.jsx", "src/components/admin/admin-actions.jsx"  ],
+, "src/components/admin/graph.jsx", "src/components/admin/AdminPage.jsx", "src/components/admin/AdminTabs.jsx", "src/components/admin/JobList.jsx", "src/components/admin/LiveJobsList.jsx", "src/components/admin/PaymentList.jsx", "src/components/admin/UserList.jsx", "src/components/dashboard/ClientDashboard.jsx", "src/app/admin/page.jsx", "src/components/admin/admin-actions.jsx", "src/components/dashboard/apply-dialog.jsx", "src/components/dashboard/DesignerDashboard.jsx", "src/components/dashboard/post-job-dialog.jsx", "src/components/dashboard/DashboardPage.jsx"  ],
   "exclude": ["node_modules"]
 }

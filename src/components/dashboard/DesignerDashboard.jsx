@@ -21,11 +21,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-interface DesignerDashboardProps {
-  userId: string;
-}
-
-export async function DesignerDashboard({ userId }: DesignerDashboardProps) {
+export async function DesignerDashboard({ userId }) {
   const { prisma } = await import("@/lib/prisma");
 
   const [openJobs, myApps, designer] = await Promise.all([
@@ -108,7 +104,7 @@ export async function DesignerDashboard({ userId }: DesignerDashboardProps) {
               </p>
             </div>
             {recommended.length > 0 && (
-              <span className="rounded-sm bg-[#101010]  py-4 px-8 text-xs font-medium text-[#cdeb00]">
+              <span className="rounded-sm bg-[#101010] py-4 px-8 text-xs font-medium text-[#cdeb00]">
                 {recommended.length} matches
               </span>
             )}

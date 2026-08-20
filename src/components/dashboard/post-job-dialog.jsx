@@ -12,21 +12,17 @@ import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/comp
 import {JOB_CATEGORIES,CURRENCIES,BUDGET_TYPES,JOB_POSTING_FEES_ETB,WORK_MODES,EXPERIENCE_LEVELS,URGENCY_LEVELS,} from "@/lib/constants";
 import {Loader2,Plus,Sparkles,Briefcase,DollarSign,MapPin,Calendar,Clock,Tag,Link2,Users,Zap,ShieldCheck,X} from "lucide-react";
 
-export function PostJobDialog({
-  trigger,
-}: {
-  trigger?: React.ReactNode;
-}) {
+export function PostJobDialog({ trigger }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [category, setCategory] = useState<string>(JOB_CATEGORIES[0]);
-  const [budgetType, setBudgetType] = useState<string>("FIXED");
-  const [currency, setCurrency] = useState<string>("ETB");
-  const [workMode, setWorkMode] = useState<string>("REMOTE");
-  const [experienceLevel, setExperienceLevel] = useState<string>("MID");
-  const [urgencyLevel, setUrgencyLevel] = useState<string>("NORMAL");
+  const [category, setCategory] = useState(JOB_CATEGORIES[0]);
+  const [budgetType, setBudgetType] = useState("FIXED");
+  const [currency, setCurrency] = useState("ETB");
+  const [workMode, setWorkMode] = useState("REMOTE");
+  const [experienceLevel, setExperienceLevel] = useState("MID");
+  const [urgencyLevel, setUrgencyLevel] = useState("NORMAL");
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     setLoading(true);
@@ -70,7 +66,7 @@ export function PostJobDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="gap-2 bg-[#cdeb00] px-8 py-5.5 hover:bg-[#101010] transition-all duration-300 hover:text-[#cdeb00] text-[#101010]  font-semibold">
+          <Button className="gap-2 bg-[#cdeb00] px-8 py-5.5 hover:bg-[#101010] transition-all duration-300 hover:text-[#cdeb00] text-[#101010] font-semibold">
             <Plus className="size-4" /> Post a Job
           </Button>
         )}
@@ -124,7 +120,7 @@ export function PostJobDialog({
                 Category
                 <span className="text-xs font-normal text-[#6b6b6b]">*</span>
               </Label>
-              <Select  value={category} onValueChange={setCategory}>
+              <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="w-full border-[#e8e8e8] focus:ring-[#cdeb00] h-13!">
                   <SelectValue />
                 </SelectTrigger>

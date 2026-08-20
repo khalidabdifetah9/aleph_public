@@ -1,30 +1,65 @@
-import { headers } from "next/headers";
+"use client";
+
+import { useState, useEffect } from "react";
 import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { PostJobDialog } from "@/components/dashboard/post-job-dialog";
 import { Sidebar } from "./Sidebar";
 import { ClientDashboard } from "./ClientDashboard";
 import { DesignerDashboard } from "./DesignerDashboard";
 import { DashboardHeader } from "./DashboardHeader";
 
-export async function DashboardPage() {
-  const reqHeaders = await headers();
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`, {
-    headers: reqHeaders,
-    cache: "no-store",
-  });
+export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const session = res.ok ? await res.json() : null;
-  const user = session?.user;
+  useEffect(() => {
+    // Fetch user data from your API
+    const fetchUser = async () => {
+      try {
+        const response = await fetch("/api/user");
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data.user);
+        } else {
+          router.push("/login?next=/dashboard");
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+        router.push("/login?next=/dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f8f8f8]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#cdeb00]"></div>
+          <p className="mt-4 text-[#6b6b6b]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
-    redirect("/login?next=/dashboard");
+    return null; // Will redirect in useEffect
   }
 
   if (user.verificationStatus !== "APPROVED") {
-    redirect("/verify?next=/dashboard");
+    router.push("/verify?next=/dashboard");
+    return null;
   }
 
-  if (user.role === "ADMIN") redirect("/admin");
+  if (user.role === "ADMIN") {
+    router.push("/admin");
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen bg-[#f8f8f8]">

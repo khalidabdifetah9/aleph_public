@@ -19,14 +19,13 @@ import {
 } from "@/components/ui/dialog";
 import {
   Loader2,
-  Send,
-  Sparkles,
   Briefcase,
   DollarSign,
   MessageSquare,
   X,
   CheckCircle2,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,12 +35,6 @@ export function ApplyDialog({
   alreadyApplied,
   existingMessage,
   existingPrice,
-}: {
-  jobId: string;
-  jobTitle: string;
-  alreadyApplied?: boolean;
-  existingMessage?: string;
-  existingPrice?: number | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -49,28 +42,30 @@ export function ApplyDialog({
   const [message, setMessage] = useState(existingMessage || "");
   const [characterCount, setCharacterCount] = useState(existingMessage?.length || 0);
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
+    const rawPrice = form.get("proposedPrice");
+
     setLoading(true);
     const res = await applyToJob({
       jobId,
       message: String(form.get("message") ?? ""),
-      proposedPrice: form.get("proposedPrice")
-        ? Number(form.get("proposedPrice"))
-        : null,
+      proposedPrice: rawPrice ? Number(rawPrice) : null,
     });
     setLoading(false);
-    if (res.error) {
+
+    if (res?.error) {
       toast.error(res.error);
       return;
     }
+
     toast.success(alreadyApplied ? "Application updated! ✨" : "Application sent! 🎉");
     setOpen(false);
     router.refresh();
   }
 
-  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleMessageChange = (e) => {
     setMessage(e.target.value);
     setCharacterCount(e.target.value.length);
   };
@@ -85,8 +80,8 @@ export function ApplyDialog({
           variant={alreadyApplied ? "outline" : "default"}
           className={cn(
             "gap-2 px-6 py-2.5 rounded-lg transition-all duration-300 font-medium",
-            alreadyApplied 
-              ? "border-[#101010] text-[#101010] hover:bg-[#101010] py-6 px-8 hover:text-white" 
+            alreadyApplied
+              ? "border-[#101010] text-[#101010] hover:bg-[#101010] py-6 px-8 hover:text-white"
               : "bg-[#cdeb00] text-[#101010] hover:bg-[#cdeb00] py-6 px-8"
           )}
         >
@@ -96,7 +91,6 @@ export function ApplyDialog({
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-lg overflow-hidden p-0">
-        {/* Decorative header bar */}
         <div className="h-1 bg-[#cdeb00]" />
 
         <div className="p-6 pt-5">
@@ -111,13 +105,14 @@ export function ApplyDialog({
                     {alreadyApplied ? "Update Application" : "Apply for This Job"}
                   </DialogTitle>
                   <DialogDescription className="text-sm text-[#6b6b6b]">
-                    {alreadyApplied 
-                      ? "Refresh your proposal to stand out." 
+                    {alreadyApplied
+                      ? "Refresh your proposal to stand out."
                       : "Introduce yourself and propose your price."}
                   </DialogDescription>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setOpen(false)}
                 className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
               >
@@ -127,13 +122,11 @@ export function ApplyDialog({
           </DialogHeader>
 
           <form onSubmit={onSubmit} className="mt-5 space-y-4">
-            {/* Job Title Display */}
             <div className="rounded-lg bg-[#f8f8f8] border border-[#e8e8e8] p-3">
               <p className="text-xs text-[#6b6b6b]">Applying to</p>
               <p className="font-medium text-[#101010]">{jobTitle}</p>
             </div>
 
-            {/* Message Field */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="message" className="text-sm font-medium text-[#101010] flex items-center gap-2">
@@ -167,7 +160,6 @@ export function ApplyDialog({
               )}
             </div>
 
-            {/* Price Field */}
             <div className="space-y-1.5">
               <Label htmlFor="proposedPrice" className="text-sm font-medium text-[#101010] flex items-center gap-2">
                 <DollarSign className="size-4 text-[#cdeb00]" />
@@ -182,19 +174,18 @@ export function ApplyDialog({
                   type="number"
                   min={0}
                   step={100}
-                  defaultValue={existingPrice ?? undefined}
+                  defaultValue={existingPrice !== null && existingPrice !== undefined ? String(existingPrice) : undefined}
                   placeholder="Enter your proposed price"
                   className="pl-12 border-[#e8e8e8] focus-visible:ring-[#cdeb00] focus-visible:border-[#cdeb00] transition-all h-11"
                 />
               </div>
               <p className="text-xs text-[#6b6b6b]">
-                {alreadyApplied 
-                  ? "Update your price if needed." 
+                {alreadyApplied
+                  ? "Update your price if needed."
                   : "Leave empty to negotiate later."}
               </p>
             </div>
 
-            {/* Tips Box */}
             <div className="rounded-lg bg-[#cdeb00]/5 border border-[#cdeb00]/20 p-3">
               <div className="flex items-start gap-2">
                 <Sparkles className="size-4 text-[#cdeb00] mt-0.5 flex-shrink-0" />
@@ -203,7 +194,7 @@ export function ApplyDialog({
                   <ul className="mt-1 space-y-0.5 text-xs text-[#6b6b6b]">
                     <li>• Be specific about your relevant experience</li>
                     <li>• Mention similar projects you have worked on</li>
-                    <li>• Explain why you have excited about this opportunity</li>
+                    <li>• Explain why you are excited about this opportunity</li>
                   </ul>
                 </div>
               </div>
