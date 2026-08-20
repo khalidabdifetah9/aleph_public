@@ -1,7 +1,7 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { MockTelebirrActions } from "@/components/payments/mock-telebirr-actions";
-import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
 export default async function MockTelebirrPage({
@@ -9,8 +9,23 @@ export default async function MockTelebirrPage({
 }: {
   searchParams: Promise<{ paymentId?: string }>;
 }) {
-  const user = await requireUser();
+  const reqHeaders = await headers();
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`,
+    {
+      headers: reqHeaders,
+      cache: "no-store",
+    }
+  );
+
+  const authData = res.ok ? await res.json() : null;
+  const user = authData?.user;
+
   const { paymentId } = await searchParams;
+
+  if (!user) {
+    redirect(`/login?next=${encodeURIComponent(`/payments/mock-telebirr?paymentId=${paymentId || ""}`)}`);
+  }
 
   if (!paymentId) redirect("/dashboard");
 

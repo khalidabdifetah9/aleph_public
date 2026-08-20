@@ -1,7 +1,7 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
-import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 
@@ -10,13 +10,34 @@ export default async function TelebirrReturnPage({
 }: {
   searchParams: Promise<{ paymentId?: string }>;
 }) {
-  const user = await requireUser();
   const { paymentId } = await searchParams;
+
+  const reqHeaders = await headers();
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`,
+    {
+      headers: reqHeaders,
+      cache: "no-store",
+    }
+  );
+
+  const authData = res.ok ? await res.json() : null;
+  const user = authData?.user;
+
+  if (!user) {
+    redirect(
+      `/login?next=${encodeURIComponent(
+        `/payments/telebirr-return?paymentId=${paymentId || ""}`
+      )}`
+    );
+  }
+
   if (!paymentId) redirect("/dashboard");
 
   const payment = await prisma.jobPayment.findUnique({
     where: { id: paymentId },
   });
+
   if (!payment || payment.clientId !== user.id) redirect("/dashboard");
 
   const paid = payment.status === "PAID";

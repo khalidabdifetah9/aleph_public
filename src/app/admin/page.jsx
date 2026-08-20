@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { AdminPage } from "@/components/admin";
 

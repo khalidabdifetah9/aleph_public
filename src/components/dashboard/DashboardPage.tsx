@@ -1,13 +1,29 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PostJobDialog } from "@/components/dashboard/post-job-dialog";
-import { requireApprovedUser } from "@/lib/session";
 import { Sidebar } from "./Sidebar";
 import { ClientDashboard } from "./ClientDashboard";
 import { DesignerDashboard } from "./DesignerDashboard";
 import { DashboardHeader } from "./DashboardHeader";
 
 export async function DashboardPage() {
-  const user = await requireApprovedUser();
+  const reqHeaders = await headers();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`, {
+    headers: reqHeaders,
+    cache: "no-store",
+  });
+
+  const session = res.ok ? await res.json() : null;
+  const user = session?.user;
+
+  if (!user) {
+    redirect("/login?next=/dashboard");
+  }
+
+  if (user.verificationStatus !== "APPROVED") {
+    redirect("/verify?next=/dashboard");
+  }
+
   if (user.role === "ADMIN") redirect("/admin");
 
   return (
