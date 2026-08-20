@@ -4,48 +4,30 @@ import { AdminTabs } from "./AdminTabs";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 
-interface AdminPageProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-  pendingUsers: any[];
-  pendingJobs: any[];
-  liveJobs: number;
-  approvedCount: number;
-  pendingPayments: any[];
-  recentPaid: any[];
-  failedPayments: any[];
-}
-
 export function AdminPage({
   user,
-  pendingUsers,
-  pendingJobs,
-  liveJobs,
-  approvedCount,
-  pendingPayments,
-  recentPaid,
-  failedPayments,
-}: AdminPageProps) {
+  pendingUsers = [],
+  pendingJobs = [],
+  liveJobs = 0,
+  approvedCount = 0,
+  pendingPayments = [],
+  recentPaid = [],
+  failedPayments = [],
+}) {
   return (
-    <div className="flex min-h-screen bg-[#f8f8f8]">
-      {/* Sidebar - fixed */}
-      <div className="fixed inset-y-0 left-0 z-30">
-        <Sidebar user={user} activeTab="overview" />
-      </div>
+    <div className="min-h-screen bg-[#f8f8f8]">
+      {/* Sidebar */}
+      <Sidebar user={user} activeTab="overview" />
 
-      {/* Main Content - with left margin for sidebar */}
-      <div className="flex-1 ml-[280px]">
+      {/* Main Layout Container */}
+      <div className="flex flex-col lg:pl-70">
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 left-[280px] z-20">
+        <header className="fixed top-0 right-0 left-0 z-20 border-b border-gray-200 bg-white lg:left-70">
           <DashboardHeader user={user} />
-        </div>
+        </header>
 
-        {/* Page Content - with top padding for header */}
-        <main className="mt-[78px] p-6">
+        {/* Dashboard Main Content */}
+        <main className="mt-19.5 flex-1 p-4 md:p-6">
           <div className="mx-auto w-full max-w-6xl">
             <AdminHeader />
 

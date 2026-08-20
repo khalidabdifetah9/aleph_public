@@ -11,23 +11,14 @@ import { UserList } from "./UserList";
 import { PaymentList } from "./PaymentList";
 import { LiveJobsList } from "./LiveJobsList";
 
-interface AdminTabsProps {
-  pendingJobs: any[];
-  pendingUsers: any[];
-  pendingPayments: any[];
-  failedPayments: any[];
-  recentPaid: any[];
-  liveJobs: number;
-}
-
 export function AdminTabs({
-  pendingJobs,
-  pendingUsers,
-  pendingPayments,
-  failedPayments,
-  recentPaid,
-  liveJobs,
-}: AdminTabsProps) {
+  pendingJobs = [],
+  pendingUsers = [],
+  pendingPayments = [],
+  failedPayments = [],
+  recentPaid = [],
+  liveJobs = 0,
+}) {
   return (
     <Tabs defaultValue="jobs" className="space-y-6">
       <TabsList className="border-b border-[#e8e8e8] bg-transparent p-0 h-auto">
@@ -35,19 +26,19 @@ export function AdminTabs({
           value="jobs"
           className="rounded-none border-b-2 border-transparent bg-transparent px-4 py-2.5 text-[#6b6b6b] data-[state=active]:border-[#cdeb00] data-[state=active]:bg-transparent data-[state=active]:text-[#101010] data-[state=active]:shadow-none"
         >
-          Jobs ({pendingJobs.length})
+          Jobs ({(pendingJobs || []).length})
         </TabsTrigger>
         <TabsTrigger
           value="people"
           className="rounded-none border-b-2 border-transparent bg-transparent px-4 py-2.5 text-[#6b6b6b] data-[state=active]:border-[#cdeb00] data-[state=active]:bg-transparent data-[state=active]:text-[#101010] data-[state=active]:shadow-none"
         >
-          People ({pendingUsers.length})
+          People ({(pendingUsers || []).length})
         </TabsTrigger>
         <TabsTrigger
           value="payments"
           className="rounded-none border-b-2 border-transparent bg-transparent px-4 py-2.5 text-[#6b6b6b] data-[state=active]:border-[#cdeb00] data-[state=active]:bg-transparent data-[state=active]:text-[#101010] data-[state=active]:shadow-none"
         >
-          Payments ({pendingPayments.length + failedPayments.length})
+          Payments ({(pendingPayments || []).length + (failedPayments || []).length})
         </TabsTrigger>
         <TabsTrigger
           value="live"

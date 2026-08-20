@@ -8,12 +8,8 @@ import { formatBudget, timeAgo } from "@/lib/format";
 import { buildTelegramJobText } from "@/lib/telegram-channel";
 import { BriefcaseBusiness, Clock } from "lucide-react";
 
-interface JobListProps {
-  jobs: any[];
-}
-
-export function JobList({ jobs }: JobListProps) {
-  if (jobs.length === 0) {
+export function JobList({ jobs = [] }) {
+  if (!jobs || jobs.length === 0) {
     return (
       <EmptyState
         icon={BriefcaseBusiness}
@@ -49,7 +45,7 @@ export function JobList({ jobs }: JobListProps) {
               </Link>
 
               <p className="mt-1 text-sm text-[#6b6b6b]">
-                {formatBudget(job)} · by {job.client.company || job.client.name}
+                {formatBudget(job)} · by {job.client?.company || job.client?.name || "Unknown"}
               </p>
 
               <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#6b6b6b]">

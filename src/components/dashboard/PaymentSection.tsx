@@ -2,10 +2,23 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ReceiptText, AlertTriangle } from "lucide-react";
 
+export interface Payment {
+  id: string;
+  amount?: number;
+  currency?: string;
+  checkoutUrl?: string;
+}
+
+export interface Job {
+  id: string;
+  title: string;
+  payment?: Payment;
+}
+
 interface PaymentSectionProps {
-  pendingPayments: any[];
-  paidJobs: any[];
-  failedPayments: any[];
+  pendingPayments: Job[];
+  paidJobs: Job[];
+  failedPayments: Job[];
   awaitingPayment: number;
 }
 
@@ -17,14 +30,14 @@ export function PaymentSection({
 }: PaymentSectionProps) {
   return (
     <>
-      <div className="flex mb-3">
+      <div className="flex items-start justify-between mb-3 gap-4">
         <div>
           <h3 className="font-semibold text-[#101010]">Payment Center</h3>
           <p className="mt-0.5 text-sm text-[#6b6b6b]">
             Track posting fees and download receipts
           </p>
         </div>
-        <div className="ml-155">
+        <div>
           <h3 className="flex items-center gap-2 font-semibold text-[#101010]">
             <AlertTriangle className="size-4 text-[#101010]" />
             Attention Needed
@@ -36,7 +49,7 @@ export function PaymentSection({
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <div className="rounded-sm overflow-scroll border border-[#e8e8e8] bg-white md:col-span-2">
+        <div className="rounded-sm overflow-auto border border-[#e8e8e8] bg-white md:col-span-2">
           <div className="flex items-center justify-between">
             {pendingPayments.length > 0 && (
               <span className="bg-[#cdeb00] px-3 py-1 text-xs font-medium text-[#101010]">
@@ -54,8 +67,8 @@ export function PaymentSection({
                 <div>
                   <p className="font-medium text-[#101010]">{job.title}</p>
                   <p className="text-sm text-[#6b6b6b]">
-                    Awaiting payment · {job.payment?.amount?.toLocaleString()}{" "}
-                    {job.payment?.currency}
+                    Awaiting payment · {job.payment?.amount?.toLocaleString() ?? 0}{" "}
+                    {job.payment?.currency ?? ""}
                   </p>
                 </div>
                 {job.payment?.checkoutUrl ? (

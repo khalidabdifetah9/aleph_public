@@ -1,35 +1,31 @@
 "use client";
 
+import React from "react";
 import DashboardStats from "@/components/admin/graph";
 
-interface AdminStatsProps {
-  pendingUsers: any[];
-  pendingJobs: any[];
-  liveJobs: number;
-  approvedCount: number;
-  pendingPayments: any[];
-  recentPaid: any[];
-  failedPayments: any[];
-}
+// Automatically extracts prop types directly from DashboardStats component
+export type AdminStatsProps = React.ComponentProps<typeof DashboardStats>;
 
 export function AdminStats({
-  pendingUsers,
-  pendingJobs,
-  liveJobs,
-  approvedCount,
-  pendingPayments,
-  recentPaid,
-  failedPayments,
+  pendingUsers = [],
+  pendingJobs = [],
+  liveJobs = 0,
+  approvedCount = 0,
+  pendingPayments = [],
+  recentPaid = [],
+  failedPayments = [],
+  ...rest
 }: AdminStatsProps) {
-  const statsData = {
-    pendingUsers: pendingUsers || [],
-    pendingJobs: pendingJobs || [],
-    liveJobs: liveJobs || 0,
-    approvedCount: approvedCount || 0,
-    pendingPayments: pendingPayments || [],
-    recentPaid: recentPaid || [],
-    failedPayments: failedPayments || []
-  };
-
-  return <DashboardStats {...statsData} />;
+  return (
+    <DashboardStats
+      pendingUsers={pendingUsers}
+      pendingJobs={pendingJobs}
+      liveJobs={liveJobs}
+      approvedCount={approvedCount}
+      pendingPayments={pendingPayments}
+      recentPaid={recentPaid}
+      failedPayments={failedPayments}
+      {...rest}
+    />
+  );
 }

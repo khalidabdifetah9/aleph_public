@@ -4,12 +4,10 @@ import { EmptyState } from "./EmptyState";
 import { timeAgo } from "@/lib/format";
 import { CreditCard, AlertTriangle, CheckCircle2 } from "lucide-react";
 
-interface PaymentListProps {
-  pendingPayments: any[];
-  failedPayments: any[];
-}
+export function PaymentList({ pendingPayments = [], failedPayments = [] }) {
+  const pending = pendingPayments || [];
+  const failed = failedPayments || [];
 
-export function PaymentList({ pendingPayments, failedPayments }: PaymentListProps) {
   return (
     <div className="space-y-6">
       {/* Pending Payments */}
@@ -18,7 +16,7 @@ export function PaymentList({ pendingPayments, failedPayments }: PaymentListProp
           <CreditCard className="size-4 text-[#cdeb00]" />
           Pending Payments
         </h3>
-        {pendingPayments.length === 0 ? (
+        {pending.length === 0 ? (
           <EmptyState
             icon={CreditCard}
             title="No pending payments"
@@ -27,17 +25,17 @@ export function PaymentList({ pendingPayments, failedPayments }: PaymentListProp
           />
         ) : (
           <div className="space-y-3">
-            {pendingPayments.map((p) => (
+            {pending.map((p) => (
               <Card key={p.id} className="border-[#e8e8e8] shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-medium text-[#101010]">{p.job.title}</p>
+                    <p className="font-medium text-[#101010]">{p.job?.title || "Untitled Job"}</p>
                     <Badge className="bg-[#cdeb00]/10 text-[#101010] border-0 rounded-full">
-                      {p.amount.toLocaleString()} {p.currency}
+                      {p.amount ? p.amount.toLocaleString() : 0} {p.currency || ""}
                     </Badge>
                   </div>
                   <p className="mt-1 text-sm text-[#6b6b6b]">
-                    {p.client.name} · {p.client.email} · {timeAgo(p.createdAt)}
+                    {p.client?.name || "Unknown"} · {p.client?.email || "No email"} · {p.createdAt ? timeAgo(p.createdAt) : "Recently"}
                   </p>
                 </CardContent>
               </Card>
@@ -52,7 +50,7 @@ export function PaymentList({ pendingPayments, failedPayments }: PaymentListProp
           <AlertTriangle className="size-4 text-[#cdeb00]" />
           Failed Payments
         </h3>
-        {failedPayments.length === 0 ? (
+        {failed.length === 0 ? (
           <EmptyState
             icon={CheckCircle2}
             title="No failed payments"
@@ -61,17 +59,17 @@ export function PaymentList({ pendingPayments, failedPayments }: PaymentListProp
           />
         ) : (
           <div className="space-y-3">
-            {failedPayments.map((p) => (
+            {failed.map((p) => (
               <Card key={p.id} className="border-[#e8e8e8] shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-medium text-[#101010]">{p.job.title}</p>
+                    <p className="font-medium text-[#101010]">{p.job?.title || "Untitled Job"}</p>
                     <Badge className="bg-red-50 text-red-700 border-0 rounded-full">
                       Failed
                     </Badge>
                   </div>
                   <p className="mt-1 text-sm text-[#6b6b6b]">
-                    {p.client.name} · {p.client.email}
+                    {p.client?.name || "Unknown"} · {p.client?.email || "No email"}
                   </p>
                   {p.failureReason && (
                     <p className="mt-2 text-xs text-[#6b6b6b]">

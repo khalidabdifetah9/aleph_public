@@ -12,12 +12,9 @@ import {
   DollarSign,
   ArrowRight,
 } from "lucide-react";
+import PropTypes from "prop-types";
 
-interface ClientDashboardProps {
-  userId: string;
-}
-
-export async function ClientDashboard({ userId }: ClientDashboardProps) {
+export async function ClientDashboard({ userId }) {
   const { prisma } = await import("@/lib/prisma");
 
   const jobs = await prisma.job.findMany({
@@ -109,3 +106,7 @@ export async function ClientDashboard({ userId }: ClientDashboardProps) {
     </div>
   );
 }
+
+ClientDashboard.propTypes = {
+  userId: PropTypes.string.isRequired,
+};
