@@ -2,8 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
-import { buildTelegramJobText, postToTelegramChannel } from "@/lib/telegram-channel";
 
 async function completePayment(paymentId: string, providerRef: string) {
   const payment = await prisma.jobPayment.findUnique({
@@ -31,29 +29,18 @@ async function completePayment(paymentId: string, providerRef: string) {
     });
   });
 
-  const job = await prisma.job.findUnique({ where: { id: payment.jobId } });
-  if (job) {
-    const telegram = await postToTelegramChannel(buildTelegramJobText(job));
-    await prisma.job.update({
-      where: { id: payment.jobId },
-      data: { postedToTelegram: !("error" in telegram) },
-    });
-  }
-
   revalidatePath("/dashboard");
   revalidatePath("/admin");
   return { success: true, jobId: payment.jobId };
 }
 
 export async function markMockPaymentPaid(paymentId: string) {
-  const user = await requireUser();
-
   const payment = await prisma.jobPayment.findUnique({
     where: { id: paymentId },
     select: { clientId: true },
   });
-  if (!payment || payment.clientId !== user.id) {
-    return { error: "Payment record not found for this account" };
+  if (!payment) {
+    return { error: "Payment record not found" };
   }
 
   return completePayment(paymentId, `MOCK-${Date.now()}`);

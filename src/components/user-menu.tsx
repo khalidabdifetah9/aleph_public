@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
 import {
   Avatar,
   AvatarFallback,
@@ -35,10 +34,16 @@ export function UserMenu({
   const router = useRouter();
 
   async function handleSignOut() {
-    await authClient.signOut();
-    toast.success("Signed out");
-    router.push("/");
-    router.refresh();
+    try {
+      await fetch("/api/auth/sign-out", {
+        method: "POST",
+      });
+      toast.success("Signed out");
+      router.push("/");
+      router.refresh();
+    } catch {
+      toast.error("Failed to sign out");
+    }
   }
 
   const initials = name
@@ -54,7 +59,7 @@ export function UserMenu({
         <Button variant="ghost" className="h-auto gap-2 px-2 py-1.5">
           <Avatar className="size-8">
             {image && <AvatarImage src={image} alt={name} />}
-            <AvatarFallback className="bg-[#cdeb00]/10 text-xs font-semibold  text-[#cdeb00]">
+            <AvatarFallback className="bg-[#cdeb00]/10 text-xs font-semibold text-[#cdeb00]">
               {initials}
             </AvatarFallback>
           </Avatar>

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Check, Copy, Loader2, Send, X } from "lucide-react";
 
-export function AdminUserActions({ userId }: { userId: string }) {
+export function AdminUserActions({ userId }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -30,8 +30,11 @@ export function AdminUserActions({ userId }: { userId: string }) {
   function approve() {
     startTransition(async () => {
       const res = await setUserVerification({ userId, status: "APPROVED" });
-      if (res.error) toast.error(res.error);
-      else toast.success("User approved");
+      if ("error" in res && res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("User approved");
+      }
       router.refresh();
     });
   }
@@ -43,10 +46,13 @@ export function AdminUserActions({ userId }: { userId: string }) {
         status: "REJECTED",
         reason: reason.trim() || undefined,
       });
-      if (res.error) toast.error(res.error);
-      else toast.success("User rejected");
-      setOpen(false);
-      setReason("");
+      if ("error" in res && res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("User rejected");
+        setOpen(false);
+        setReason("");
+      }
       router.refresh();
     });
   }
@@ -88,21 +94,18 @@ export function AdminUserActions({ userId }: { userId: string }) {
   );
 }
 
-export function AdminJobActions({
-  jobId,
-  telegramText,
-}: {
-  jobId: string;
-  telegramText: string;
-}) {
+export function AdminJobActions({ jobId, telegramText }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
   function approve() {
     startTransition(async () => {
       const res = await postJob(jobId);
-      if (res.error) toast.error(res.error);
-      else toast.success("Job approved, posted to Telegram, and now live.");
+      if ("error" in res && res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("Job approved, posted to Telegram, and now live.");
+      }
       router.refresh();
     });
   }
@@ -110,8 +113,11 @@ export function AdminJobActions({
   function decline() {
     startTransition(async () => {
       const res = await rejectJob(jobId);
-      if (res.error) toast.error(res.error);
-      else toast.success("Job rejected");
+      if ("error" in res && res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("Job rejected");
+      }
       router.refresh();
     });
   }
@@ -151,7 +157,7 @@ export function AdminJobActions({
   );
 }
 
-export function TelegramShareButton({ text }: { text: string }) {
+export function TelegramShareButton({ text }) {
   async function copy() {
     try {
       await navigator.clipboard.writeText(text);

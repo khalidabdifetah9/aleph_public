@@ -1,7 +1,7 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
-import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { verifyChapaTransaction } from "@/lib/chapa";
@@ -12,7 +12,19 @@ export default async function ChapaReturnPage({
 }: {
   searchParams: Promise<{ paymentId?: string; tx_ref?: string; trx_ref?: string }>;
 }) {
-  const user = await requireUser();
+  const reqHeaders = await headers();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`, {
+    headers: reqHeaders,
+    cache: "no-store",
+  });
+
+  const session = res.ok ? await res.json() : null;
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const user = session.user;
   const { paymentId, tx_ref, trx_ref } = await searchParams;
   if (!paymentId) redirect("/dashboard");
 

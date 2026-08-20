@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/session";
-import { getPostingFeeForCategory } from "@/lib/telebirr";
 import { initiateChapaCheckout } from "@/lib/chapa";
 
 export interface JobInput {
+  clientId: string;
+  clientEmail: string;
+  clientName: string;
   title: string;
   description: string;
   category: string;
@@ -25,13 +26,6 @@ export interface JobInput {
 }
 
 export async function createJob(input: JobInput) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Not authenticated" };
-  if (user.role !== "CLIENT") return { error: "Only clients can post jobs" };
-  if (!user.onboarded || user.verificationStatus !== "APPROVED") {
-    return { error: "Your account must be approved before posting jobs" };
-  }
-
   const title = input.title?.trim();
   const description = input.description?.trim();
   if (!title || title.length < 4) return { error: "Please add a clear title" };
@@ -52,7 +46,8 @@ export async function createJob(input: JobInput) {
     return { error: "Budget minimum cannot be greater than budget maximum" };
   }
 
-  const postingFee = getPostingFeeForCategory(input.category);
+  // Set standard posting fee
+  const postingFee = 500;
 
   const created = await prisma.$transaction(async (tx) => {
     const job = await tx.job.create({
@@ -73,14 +68,14 @@ export async function createJob(input: JobInput) {
         attachmentsUrl: input.attachmentsUrl?.trim() || null,
         urgencyLevel: input.urgencyLevel?.trim() || "NORMAL",
         status: "PAYMENT_PENDING",
-        clientId: user.id,
+        clientId: input.clientId,
       },
     });
 
     const payment = await tx.jobPayment.create({
       data: {
         jobId: job.id,
-        clientId: user.id,
+        clientId: input.clientId,
         amount: postingFee,
         currency: "ETB",
         provider: "CHAPA",
@@ -96,8 +91,8 @@ export async function createJob(input: JobInput) {
       paymentId: created.payment.id,
       amount: postingFee,
       title: created.job.title,
-      email: user.email,
-      fullName: user.name,
+      email: input.clientEmail,
+      fullName: input.clientName,
     });
 
     await prisma.jobPayment.update({
@@ -123,7 +118,7 @@ export async function createJob(input: JobInput) {
         failureReason:
           error instanceof Error
             ? error.message.slice(0, 300)
-            : "Telebirr checkout initialization failed",
+            : "Chapa checkout initialization failed",
       },
     });
     return {
@@ -135,18 +130,10 @@ export async function createJob(input: JobInput) {
 
 export async function applyToJob(input: {
   jobId: string;
+  designerId: string;
   message: string;
   proposedPrice?: number | null;
 }) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Not authenticated" };
-  if (user.role !== "DESIGNER") {
-    return { error: "Only designers can apply to jobs" };
-  }
-  if (!user.onboarded || user.verificationStatus !== "APPROVED") {
-    return { error: "Your account must be approved before applying" };
-  }
-
   const message = input.message?.trim();
   if (!message || message.length < 10) {
     return { error: "Please write a short pitch (at least 10 characters)" };
@@ -159,11 +146,11 @@ export async function applyToJob(input: {
 
   await prisma.application.upsert({
     where: {
-      jobId_designerId: { jobId: input.jobId, designerId: user.id },
+      jobId_designerId: { jobId: input.jobId, designerId: input.designerId },
     },
     create: {
       jobId: input.jobId,
-      designerId: user.id,
+      designerId: input.designerId,
       message,
       proposedPrice: input.proposedPrice ?? null,
     },
@@ -183,17 +170,11 @@ export async function setApplicationStatus(input: {
   applicationId: string;
   status: "ACCEPTED" | "REJECTED";
 }) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Not authenticated" };
-
   const application = await prisma.application.findUnique({
     where: { id: input.applicationId },
     include: { job: true },
   });
   if (!application) return { error: "Application not found" };
-  if (application.job.clientId !== user.id) {
-    return { error: "You can only manage applicants for your own jobs" };
-  }
 
   await prisma.application.update({
     where: { id: input.applicationId },
@@ -213,11 +194,8 @@ export async function setApplicationStatus(input: {
 }
 
 export async function closeJob(jobId: string) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Not authenticated" };
-
   const job = await prisma.job.findUnique({ where: { id: jobId } });
-  if (!job || job.clientId !== user.id) {
+  if (!job) {
     return { error: "Job not found" };
   }
 

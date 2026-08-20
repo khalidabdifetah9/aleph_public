@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { ApplyDialog } from "@/components/dashboard/apply-dialog";
@@ -18,7 +19,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { requireApprovedUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { formatBudget, timeAgo } from "@/lib/format";
 import {
@@ -38,7 +38,23 @@ export default async function JobDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const user = await requireApprovedUser(`/jobs/${id}`);
+
+  const reqHeaders = await headers();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`, {
+    headers: reqHeaders,
+    cache: "no-store",
+  });
+
+  const session = res.ok ? await res.json() : null;
+  const user = session?.user;
+
+  if (!user) {
+    redirect(`/login?next=${encodeURIComponent(`/jobs/${id}`)}`);
+  }
+
+  if (user.verificationStatus !== "APPROVED") {
+    redirect(`/verify?next=${encodeURIComponent(`/jobs/${id}`)}`);
+  }
 
   const job = await prisma.job.findUnique({
     where: { id },

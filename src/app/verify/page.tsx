@@ -1,8 +1,8 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { ProfileForm } from "@/components/profile-form";
 import { Badge } from "@/components/ui/badge";
-import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Clock, UserRoundPen, XCircle } from "lucide-react";
@@ -18,7 +18,21 @@ export default async function VerifyPage({
     requestedRoleRaw === "DESIGNER" || requestedRoleRaw === "CLIENT"
       ? requestedRoleRaw
       : null;
-  const sessionUser = await requireUser(next ?? undefined);
+
+  const reqHeaders = await headers();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`, {
+    headers: reqHeaders,
+    cache: "no-store",
+  });
+
+  const session = res.ok ? await res.json() : null;
+
+  if (!session?.user) {
+    redirect(`/login${next ? `?next=${encodeURIComponent(next)}` : ""}`);
+  }
+
+  const sessionUser = session.user;
+
   if (sessionUser.role === "ADMIN") redirect("/admin");
 
   let user = await prisma.user.findUnique({

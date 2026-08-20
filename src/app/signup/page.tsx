@@ -1,7 +1,7 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { SignupForm } from "@/components/auth/signup-form";
-import { getCurrentUser } from "@/lib/session";
 
 export default async function SignupPage({
   searchParams,
@@ -10,8 +10,16 @@ export default async function SignupPage({
 }) {
   const { role, next: rawNext } = await searchParams;
   const next = rawNext && rawNext.startsWith("/") ? rawNext : null;
-  const user = await getCurrentUser();
-  if (user) redirect(next ?? "/dashboard");
+
+  const reqHeaders = await headers();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/get-session`, {
+    headers: reqHeaders,
+    cache: "no-store",
+  });
+
+  const session = res.ok ? await res.json() : null;
+
+  if (session?.user) redirect(next ?? "/dashboard");
 
   return (
     <AuthShell

@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/session";
 
 export interface ProfileInput {
+  userId: string;
   name: string;
   headline?: string;
   bio?: string;
@@ -25,14 +25,13 @@ export interface ProfileInput {
 }
 
 export async function updateProfile(input: ProfileInput) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Not authenticated" };
+  if (!input.userId) return { error: "User ID is required" };
 
   const name = input.name?.trim();
   if (!name) return { error: "Name is required" };
 
   await prisma.user.update({
-    where: { id: user.id },
+    where: { id: input.userId },
     data: {
       name,
       headline: input.headline?.trim() || null,

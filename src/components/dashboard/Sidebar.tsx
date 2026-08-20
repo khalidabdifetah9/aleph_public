@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   BriefcaseBusiness, 
@@ -18,21 +17,14 @@ import {
   X,
   LucideIcon
 } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+// Define types
 interface User {
-  id: string;
+  id?: string;
   name: string;
   email: string;
   role: string;
-}
-
-interface SidebarProps {
-  user: User;
-  activeTab?: string;
-  className?: string;
 }
 
 interface NavItemType {
@@ -42,10 +34,19 @@ interface NavItemType {
   href: string;
 }
 
+interface SidebarProps {
+  user: User;
+  activeTab?: string;
+  className?: string;
+}
+
+interface NavItemProps {
+  item: NavItemType;
+  isActive: boolean;
+}
+
 export function Sidebar({ user, activeTab = "overview", className = "" }: SidebarProps) {
-  const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const initials = (user?.name || "User")
     .trim()
@@ -99,25 +100,14 @@ export function Sidebar({ user, activeTab = "overview", className = "" }: Sideba
     },
   ];
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          toast.success("Logged out successfully");
-          router.push("/login");
-          router.refresh();
-        },
-        onError: () => {
-          toast.error("Failed to log out");
-          setIsLoggingOut(false);
-        },
-      },
-    });
+  const handleLogout = (): void => {
+    console.log("Logging out...");
+    // You can add any logout logic here like clearing local storage
+    // localStorage.clear();
+    // window.location.href = "/login";
   };
 
-  const NavItem = ({ item, isActive }: { item: NavItemType; isActive: boolean }) => (
+  const NavItem = ({ item, isActive }: NavItemProps) => (
     <Link
       href={item.href}
       onClick={() => setIsOpen(false)}
@@ -221,8 +211,7 @@ export function Sidebar({ user, activeTab = "overview", className = "" }: Sideba
             </div>
             <button
               onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-red-400 disabled:opacity-50"
+              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-red-400"
               aria-label="Logout"
             >
               <LogOut size={17} />
