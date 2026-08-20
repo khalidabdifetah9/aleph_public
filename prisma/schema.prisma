@@ -1,0 +1,195 @@
+// Aleph Jobs — data model (Neon Postgres)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth models (managed by Better Auth) + our custom profile fields on User
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Role in the marketplace: CLIENT | DESIGNER | ADMIN
+  role String @default("CLIENT")
+
+  // Legacy Telegram verification fields (kept for backward compatibility)
+  telegramId       String?  @unique
+  telegramUsername String?
+  telegramPhotoUrl String?
+  telegramVerified Boolean  @default(false)
+
+  // Admin verification of the account: PENDING | APPROVED | REJECTED
+  verificationStatus String  @default("PENDING")
+  rejectionReason    String?
+
+  // Shared / profile fields
+  headline     String?
+  bio          String?
+  location     String?
+  phone        String?
+  onboarded    Boolean @default(false)
+  profileImage String?
+  timezone     String?
+  languages    String?
+  yearsExperience Int?
+  availability String?
+  linkedinUrl  String?
+
+  // Designer-specific
+  skills       String? // comma-separated tags
+  portfolioUrl String?
+  hourlyRate   Int?
+
+  // Client-specific
+  company String?
+  companyWebsite String?
+  industry       String?
+
+  sessions     Session[]
+  accounts     Account[]
+  jobs         Job[]         @relation("ClientJobs")
+  applications Application[] @relation("DesignerApplications")
+  payments     JobPayment[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Marketplace models
+// ---------------------------------------------------------------------------
+
+model Job {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  category    String
+  budgetMin   Int?
+  budgetMax   Int?
+  budgetType  String  @default("FIXED") // FIXED | HOURLY | NEGOTIABLE
+  currency    String  @default("ETB")
+  location    String?
+  deadline    DateTime?
+  experienceLevel String  @default("MID") // JUNIOR | MID | SENIOR | EXPERT
+  workMode       String   @default("REMOTE") // REMOTE | ONSITE | HYBRID
+  projectLength  String?
+  requiredSkills String?
+  attachmentsUrl String?
+  urgencyLevel   String   @default("NORMAL") // LOW | NORMAL | HIGH
+
+  // PAYMENT_PENDING | PENDING_REVIEW | POSTED | ASSIGNED | CLOSED | REJECTED
+  status           String  @default("PENDING_REVIEW")
+  postedToTelegram Boolean @default(false)
+
+  clientId String
+  client   User   @relation("ClientJobs", fields: [clientId], references: [id], onDelete: Cascade)
+
+  applications Application[]
+  payment      JobPayment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("job")
+}
+
+model JobPayment {
+  id                String   @id @default(cuid())
+  provider          String   @default("TELEBIRR")
+  status            String   @default("PENDING") // PENDING | PAID | FAILED
+  amount            Int
+  currency          String   @default("ETB")
+  providerReference String?
+  checkoutUrl       String?
+  paidAt            DateTime?
+  failureReason     String?
+  rawPayload        Json?
+
+  clientId String
+  client   User   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  jobId String @unique
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@map("job_payment")
+}
+
+model Application {
+  id            String  @id @default(cuid())
+  message       String
+  proposedPrice Int?
+  status        String  @default("PENDING") // PENDING | ACCEPTED | REJECTED
+
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  designerId String
+  designer   User   @relation("DesignerApplications", fields: [designerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, designerId])
+  @@map("application")
+}

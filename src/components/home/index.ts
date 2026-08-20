@@ -1,0 +1,10 @@
+export { Hero } from "./Hero";
+export { Stats } from "./Stats";
+export { HowItWorks } from "./HowItWorks";
+export { Audiences } from "./Audiences";
+export { FAQ } from "./FAQ";
+export { Trust } from "./Trust";
+export { TrustPill } from "./TrustPill";
+export { CTA } from "./CTA";
+export { Footer } from "./Footer";
+export { SectionHeading } from "./SectionHeading";
