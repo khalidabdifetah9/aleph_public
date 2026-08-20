@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "./EmptyState";
 import { formatBudget, timeAgo } from "@/lib/format";
-import { buildTelegramJobText } from "@/lib/telegram-channel";
 import { BriefcaseBusiness, Clock } from "lucide-react";
 
 export function JobList({ jobs = [] }) {
@@ -22,7 +21,6 @@ export function JobList({ jobs = [] }) {
   return (
     <div className="space-y-4">
       {jobs.map((job) => {
-        const telegramText = buildTelegramJobText(job);
         return (
           <Card key={job.id} className="border-[#e8e8e8] shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
@@ -53,10 +51,7 @@ export function JobList({ jobs = [] }) {
               </p>
 
               <div className="mt-5 pt-4 border-t border-[#e8e8e8]">
-                <AdminJobActions
-                  jobId={job.id}
-                  telegramText={telegramText}
-                />
+                <AdminJobActions jobId={job.id} />
               </div>
             </CardContent>
           </Card>
